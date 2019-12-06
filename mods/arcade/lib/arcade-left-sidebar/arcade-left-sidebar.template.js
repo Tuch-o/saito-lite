@@ -14,7 +14,7 @@ module.exports = ArcadeLeftSidebarTemplate = () => {
   </div>
   <div class="add-games-control">
   <h3>Get More Games</h3>
-      <button class="add-games"><i class="fas fa-plus-circle"></i>Saito Appstore</button>
+    <a href="/email?module=appstore"><button class="add-games"><i class="fas fa-plus-circle"></i>Saito Appstore</button></a>
   </div>
   <div class="email-chat"></div>
     

@@ -11,7 +11,6 @@ module.exports = ScheduleAppspace = {
 
     attachEvents(app, data) {
 
-
       document.getElementById('add_btn').addEventListener('click', (e) => {
         alert("add");
       });
@@ -20,9 +19,8 @@ module.exports = ScheduleAppspace = {
         alert("edit");
       });
 
-      const selectElement = document.querySelector('.schedule-calendar-sidebar-select');
-      selectElement.addEventListener('change',(e) =>{
-       alert(selectElement.value);
+      document.querySelector('.schedule-calendar-sidebar-select').addEventListener('change',(e) =>{
+        alert(e.currentTarget.value);
       })
 
     },

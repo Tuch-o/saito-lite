@@ -66,8 +66,8 @@ fi
 cd ./web && npm run build
 
 
-#cat ./lib/saito/boot.js ./web/saito/saito.js > ./web/saito/saito2.js
-#mv -f ./web/saito/saito2.js ./web/saito/saito.js
+cat ./lib/saito/boot.js ./web/saito/saito.js > ./web/saito/saito2.js
+mv -f ./web/saito/saito2.js ./web/saito/saito.js
 
 
 
@@ -78,6 +78,10 @@ echo "///////////////"
 echo "Saito will default to running on a local, private network for "
 echo "development and testing unless you create a configuration file"
 echo "specifying a connection point to the public network.          "
+echo ""
+echo "Compile script needs updating so it can be run in other directories"
+echo "and still include the boot.js script.... <--- TODO"
+echo ""
 echo ""
 echo "You can start Saito by running: "
 echo ""
