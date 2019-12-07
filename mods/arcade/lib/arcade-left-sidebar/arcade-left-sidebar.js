@@ -21,6 +21,7 @@ module.exports = ArcadeLeftSidebar = {
           games_menu.innerHTML += `<li class="arcade-navigator-item" id="${gamemods[i].name}">${gamemods[i].name}</li>`;
         }
       }
+      games_menu.innerHTML += `<li class="arcade-navigator-item"><a href="/email?module=appstore">... install more</a></li>`;
 
     },
 
