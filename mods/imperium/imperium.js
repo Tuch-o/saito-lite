@@ -520,10 +520,13 @@ console.log("CONFIRMS RECEIVED: " + this.game.confirms_received + " of " + this.
     	      this.game.queue.splice(qe-1, 2);
   	      return 1;
   	    } else {
-    	      this.game.queue.splice(qe, 1);
-	      if (mv[3] != undefined) {
+	      if (mv[3] == undefined) {
+console.log("MV3 is undefined, so we stop...");
+    	        this.game.queue.splice(qe, 1);
   	        return 0;
-	      } else {
+              } else {
+console.log("MV3 is defined, so we fall through...");
+    	        this.game.queue.splice(qe, 1);
   	        return 1;
 	      }
             }
@@ -533,7 +536,7 @@ console.log("CONFIRMS RECEIVED: " + this.game.confirms_received + " of " + this.
   	  } else {
     	    this.game.queue.splice(qe-1, 2);
   	    return 1;
-  	  }
+	  }
         } else {
 
 console.log("removing event here...");
@@ -586,6 +589,7 @@ console.log("resolving earlier: " + this.game.queue[z]);
      
       if (mv[0] == "vote") {
 
+	let laws = this.returnAgendaCards();
         let agenda_num = mv[1];
 	let player = mv[2];
 	let vote = mv[3];
@@ -594,7 +598,7 @@ console.log("resolving earlier: " + this.game.queue[z]);
 	this.game.state.votes_cast[player-1] = votes;
 	this.game.state.votes_available[player-1] -= votes;
 	this.game.state.voted_on_agenda[player-1][this.game.state.voting_on_agenda] = 1;
-	this.game.state.how_voted_on_agenda[player-1][this.game.state.voting_on_agenda] = vote;
+	this.game.state.how_voted_on_agenda[player-1] = vote;
 console.log("VOTING FINISHED 1!");
 
 	let votes_finished = 0;
@@ -604,13 +608,70 @@ console.log("VOTING FINISHED 2!");
 	}
 
 console.log("VOTING FINISHED 3!");
+
+	//
+	// everyone has voted
+	//
 	if (votes_finished == this.game.players.length) {
 console.log("VOTING FINISHED 4!");
-	  console.log("WE HAVE FINISHED THE VOTE ON AGENDA " + this.game.state.voting_on_agenda);
+
+  	  console.log("WE HAVE FINISHED THE VOTE ON AGENDA " + this.game.state.voting_on_agenda);
 	  console.log(JSON.stringify(this.game.state.how_voted_on_agenda));
 	  console.log(JSON.stringify(this.game.state.votes_cast));
-	}
 
+	  let votes_for = 0;
+	  let votes_against = 0;
+	  let direction_of_vote = "tie";
+ 	  let players_in_favour = [];
+	  let players_opposed = [];
+
+	  for (let i = 0; i < this.game.players.length; i++) {
+
+	    if (this.game.state.how_voted_on_agenda[i] == "support") {
+	      votes_for += this.game.state.votes_cast[i];
+	      players_in_favour.push(i+1);
+	    }
+	    if (this.game.state.how_voted_on_agenda[i] == "oppose") {
+	      votes_against += this.game.state.votes_cast[i];
+	      players_opposed.push(i+1);
+	    }
+	    if (votes_against > votes_for) { direction_of_vote = "fails"; }
+	    if (votes_against < votes_for) { direction_of_vote = "passes"; }	    
+	  }
+
+	  //
+	  // announce if the vote passed
+	  //
+	  this.updateLog("The agenda "+direction_of_vote);
+	 
+	  //
+	  //
+	  //
+	  if (direction_of_vote == "passes") {
+	    laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
+	      console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
+	    });
+	  } else {
+	    if (direction_of_vote == "fails") {
+	      laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
+	        console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
+	      });
+	    } else {
+	      this.updateLog("The law is quietly shelved...");
+	    }
+	  }
+
+
+	
+	  //
+	  // prepare for next vote
+	  //
+	  for (let i = 0; i < this.game.players.length; i++) {
+	    this.game.state.voted_on_agenda[i] = 0;
+	  }
+	  this.game.state.voting_on_agenda++;
+
+	}
 
 console.log("VOTING FINISHED 5!");
 
@@ -635,6 +696,8 @@ console.log("VOTING FINISHED 5!");
 	if (this.game.player != who_is_next) {
 
           let html  = 'The following agenda has advanced for consideration in the Galactic Senate:<p></p>';
+  	      html += '<b>' + laws[imperium_self.game.state.agendas[agenda_num]].name + '</b>';
+	      html += '<br />';
 	      html += laws[imperium_self.game.state.agendas[agenda_num]].text;
 	      html += '<p></p>';
 	      html += 'Player '+who_is_next+' is now voting.';
@@ -644,6 +707,8 @@ console.log("VOTING FINISHED 5!");
 
 
           let html  = 'The following agenda has advanced for consideration in the Galactic Senate:<p></p>';
+  	      html += '<b>' + laws[imperium_self.game.state.agendas[agenda_num]].name + '</b>';
+	      html += '<br />';
   	      html += laws[imperium_self.game.state.agendas[agenda_num]].text;
 	      html += '<p></p>';
               html += '<li class="option" id="support">support</li>';
@@ -5465,60 +5530,140 @@ console.log("VOTING FINISHED 5!");
   	type : "instant" ,
   	text : "Gain control of one planet not controlled by any player" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     action['action2']	= { 
   	name : "Hydrocannon Cooling" ,
   	type : "instant" ,
   	text : "Ship gets -2 on combat rolls next round" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     action['action3']	= { 
   	name : "Agile Thrusters" ,
   	type : "instant" ,
   	text : "Attached ship may cancel up to 2 hits by PDS or Ion Cannons" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action4']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Exhaust a planet card held by another player. Gain trade goods equal to resource value." ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action5']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 yellow technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action6']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 blue technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action7']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 red technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action8']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 green technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action9']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Replace 1 of your Destroyers with a Dreadnaught" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action10']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Place 1 Destroyer in a system with no existing ships" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
   
     return action;
@@ -6614,6 +6759,7 @@ console.log("PLAYER " + player + " has units in " + sector);
       this.game.state.how_voted_on_agenda = [];
       this.game.state.voted_on_agenda = [];
       this.game.state.voting_on_agenda = 0;
+
       for (let i = 0; i < this.game.players.length; i++) {
 	this.game.state.votes_available.push(this.returnAvailableVotes(i+1));
 	this.game.state.votes_cast.push(0);
