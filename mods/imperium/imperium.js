@@ -661,8 +661,6 @@ console.log("VOTING FINISHED 4!");
 	    if (votes_against < votes_for) { direction_of_vote = "passes"; }	    
 	  }
 
-console.log("FINISH VOTING 1");
-
 	  //
 	  // announce if the vote passed
 	  //
@@ -672,14 +670,11 @@ console.log("FINISH VOTING 1");
 	  //
 	  //
 	  if (direction_of_vote == "passes") {
-console.log("FINISH VOTING 2");
 	    laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
 	      console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
 	    });
 	  } else {
-console.log("FINISH VOTING 2");
 	    if (direction_of_vote == "fails") {
-console.log("FINISH VOTING 3");
 	      laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
 	        console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
 	      });
@@ -699,7 +694,6 @@ console.log("FINISH VOTING 3");
 	  this.game.state.voting_on_agenda++;
 
 	}
->>>>>>> master
 
 console.log("VOTING FINISHED 5!");
 
@@ -5598,60 +5592,140 @@ console.log("pushing player: " + (a+1));
   	type : "instant" ,
   	text : "Gain control of one planet not controlled by any player" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     action['action2']	= { 
   	name : "Hydrocannon Cooling" ,
   	type : "instant" ,
   	text : "Ship gets -2 on combat rolls next round" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     action['action3']	= { 
   	name : "Agile Thrusters" ,
   	type : "instant" ,
   	text : "Attached ship may cancel up to 2 hits by PDS or Ion Cannons" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action4']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Exhaust a planet card held by another player. Gain trade goods equal to resource value." ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action5']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 yellow technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action6']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 blue technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action7']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 red technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action8']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Cancel 1 green technology prerequisite" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action9']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Replace 1 of your Destroyers with a Dreadnaught" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
     action['action10']	= { 
   	name : "" ,
   	type : "instant" ,
   	text : "Place 1 Destroyer in a system with no existing ships" ,
   	img : "/imperium/img/action_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	},
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	},
     };
   
     return action;
