@@ -2,6 +2,7 @@ const path        = require('path');
 const saito = require('../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 
+const RegistryModal = require('./lib/modal/registry-modal');
 
 
 class Registry extends ModTemplate {
@@ -44,10 +45,12 @@ class Registry extends ModTemplate {
   }
 *******/
 
+  showModal() {
+    RegistryModal.render(this.app, this);
+    RegistryModal.attachEvents(this.app, this);
+  }
 
-
-
-  register_identifier(identifier) {
+  registerIdentifier(identifier, domain="@saito") {
 
     let newtx = this.app.wallet.createUnsignedTransaction(this.publickey, this.app.wallet.wallet.default_fee, this.app.wallet.wallet.default_fee);
     if (newtx == null) {
@@ -55,12 +58,20 @@ class Registry extends ModTemplate {
       return;
     }
 
-    newtx.transaction.msg.module   	= "Registry";
-    newtx.transaction.msg.request	= "register";
-    newtx.transaction.msg.identifier	= identifier;
+    if (typeof identifier === 'string' || identifier instanceof String) {
+      var regex=/^[0-9A-Za-z]+$/;
+      if (!regex.test(identifier)) { salert("Alphanumeric Characters only"); return false; }
 
-    newtx = this.app.wallet.signTransaction(newtx);
-    this.app.network.propagateTransaction(newtx); 
+      newtx.transaction.msg.module   	= "Registry";
+      newtx.transaction.msg.request	= "register";
+      newtx.transaction.msg.identifier	= identifier + domain;
+
+      newtx = this.app.wallet.signTransaction(newtx);
+      this.app.network.propagateTransaction(newtx);
+
+      // sucessful send
+      return true;
+    }
 
   }
 
@@ -105,8 +116,8 @@ class Registry extends ModTemplate {
 
 	  // send message
 	  if (res == 1) {
-	    
-	    let newtx = registry_self.app.wallet.createUnsignedTransaction(tx.transaction.from[0].add, 0.0, fee);	    
+
+	    let newtx = registry_self.app.wallet.createUnsignedTransaction(tx.transaction.from[0].add, 50.0, fee);
 		newtx.transaction.msg.module = "Email";
 		newtx.transaction.msg.title  = "Address Registration Success!";
 	    	newtx.transaction.msg.message = "You have successfully registered the identifier: " + identifier;

@@ -1,6 +1,6 @@
 const saito = require('../../lib/saito/saito');
+const GameHud = require('../../lib/templates/lib/game-hud/game-hud'); 
 const GameTemplate = require('../../lib/templates/gametemplate');
-  
   
 class Imperium extends GameTemplate {
   
@@ -13,9 +13,6 @@ class Imperium extends GameTemplate {
     this.minPlayers      = 2;
     this.maxPlayers      = 4;  
 
-    this.useHUD = 1;
-    this.addHUDMenu      = ['Planets','Tech','Trade','Laws'];
-  
     this.gameboardWidth  = 1900;
   
     this.rmoves          = [];
@@ -26,6 +23,9 @@ class Imperium extends GameTemplate {
     this.minPlayers = 3;
     this.maxPlayers = 6;
     this.type       = "Strategy Boardgame";
+
+    this.hud = new GameHud(this.app, this.menuItems());
+
   
     //
     // game-related
@@ -45,27 +45,31 @@ class Imperium extends GameTemplate {
   /////////////////
   /// HUD MENUS ///
   /////////////////
-/****
-  Imperium.prototype.triggerHUDMenu = function triggerHUDMenu(menuitem) {
-    switch (menuitem) {
-      case "planets":
-        this.handlePlanetsMenuItem();
-        break;
-      case "tech":
-        this.handleTechMenuItem();
-        break;
-      case "trade":
-        this.handleTradeMenuItem();
-        break;
-      case "laws":
-        this.handleLawsMenuItem();
-        break;
-      default:
-        break;
+  menuItems() {
+    return {
+      'game-planets': {
+        name: 'Planets',
+        callback: this.handlePlanetsMenuItem.bind(this)
+      },
+      'game-tech': {
+        name: 'Tech',
+        callback: this.handleTechMenuItem.bind(this)
+      },
+      'game-player': {
+        name: 'Trade',
+        callback: this.handleTradeMenuItem.bind(this)
+      },
+      'game-player': {
+        name: 'Laws',
+        callback: this.handleLawsMenuItem.bind(this)
+      },
     }
   }
-  
-  Imperium.prototype.handlePlanetsMenuItem = function handlePlanetsMenuItem() {
+
+
+
+
+  handlePlanetsMenuItem() {
   
     let imperium_self = this;
     let factions = this.returnFactions();
@@ -110,8 +114,10 @@ class Imperium extends GameTemplate {
   }
   
   
-  
-  Imperium.prototype.handleTechMenuItem = function handleTechMenuItem() {
+
+
+ 
+  handleTechMenuItem() {
   
     let imperium_self = this;
     let factions = this.returnFactions();
@@ -151,9 +157,12 @@ class Imperium extends GameTemplate {
     });
   }
   
+
+
+
+
   
-  
-  Imperium.prototype.handleTradeMenuItem = function handleTradeMenuItem() {
+  handleTradeMenuItem() {
   
     let imperium_self = this;
     let factions = this.returnFactions();
@@ -198,8 +207,11 @@ class Imperium extends GameTemplate {
   
     });
   }
-  
-  Imperium.prototype.handleLawsMenuItem = function handleLawsMenuItem() {
+
+
+
+
+  handleLawsMenuItem() {
   
     let imperium_self = this;
     let laws = this.returnAgendaCards();
@@ -233,8 +245,10 @@ class Imperium extends GameTemplate {
     $('.hud_menu_overlay').html(html);
   
   }
-  ******/
   
+
+
+
   
   
   
@@ -485,6 +499,9 @@ console.log("hitting queue management!");
       let mv = this.game.queue[qe].split("\t");
       let shd_continue = 1;
   
+
+console.log("GAME QUEUE: " + this.game.queue);
+
       if (mv[0] === "gameover") {
   	if (imperium_self.browser_active == 1) {
   	  alert("Game Over");
@@ -520,11 +537,14 @@ console.log("CONFIRMS RECEIVED: " + this.game.confirms_received + " of " + this.
     	      this.game.queue.splice(qe-1, 2);
   	      return 1;
   	    } else {
-    	      this.game.queue.splice(qe, 1);
-	      if (mv[3] != undefined) {
+	      if (mv[3] == undefined) {
+console.log("MV3 is undefined, so we stop...");
+    	        this.game.queue.splice(qe, 1);
   	        return 0;
-	      } else {
-  	        return 1;
+              } else {
+console.log("MV3 is defined, so we fall through...");
+    	        this.game.queue.splice(qe, 1);
+  	        return 0;
 	      }
             }
   
@@ -533,7 +553,7 @@ console.log("CONFIRMS RECEIVED: " + this.game.confirms_received + " of " + this.
   	  } else {
     	    this.game.queue.splice(qe-1, 2);
   	    return 1;
-  	  }
+	  }
         } else {
 
 console.log("removing event here...");
@@ -564,9 +584,11 @@ console.log("resolving earlier: " + this.game.queue[z]);
       if (mv[0] === "turn") {
   
   	this.game.state.turn++;
-  
+ 
   	let new_round = 1;
+console.log("TESTING PLAYER INFO LENGTH: " + this.game.players_info.length);
         for (let i = 0; i < this.game.players_info.length; i++) {
+console.log("IS PASSED: " + this.game.players_info[i].passed);
   	  if (this.game.players_info[i].passed == 0) { new_round = 0; }
         }
   
@@ -574,8 +596,11 @@ console.log("resolving earlier: " + this.game.queue[z]);
   	// NEW TURN
   	//
   	if (new_round == 1) {
+console.log("ADDING NEWROUND");
+  	  this.game.queue.push("setinitiativeorder");
   	  this.game.queue.push("newround");
   	} else {
+console.log("SET INIT ORDER");
   	  this.game.queue.push("setinitiativeorder");
   	}
   
@@ -586,6 +611,7 @@ console.log("resolving earlier: " + this.game.queue[z]);
      
       if (mv[0] == "vote") {
 
+	let laws = this.returnAgendaCards();
         let agenda_num = mv[1];
 	let player = mv[2];
 	let vote = mv[3];
@@ -594,7 +620,7 @@ console.log("resolving earlier: " + this.game.queue[z]);
 	this.game.state.votes_cast[player-1] = votes;
 	this.game.state.votes_available[player-1] -= votes;
 	this.game.state.voted_on_agenda[player-1][this.game.state.voting_on_agenda] = 1;
-	this.game.state.how_voted_on_agenda[player-1][this.game.state.voting_on_agenda] = vote;
+	this.game.state.how_voted_on_agenda[player-1] = vote;
 console.log("VOTING FINISHED 1!");
 
 	let votes_finished = 0;
@@ -604,13 +630,76 @@ console.log("VOTING FINISHED 2!");
 	}
 
 console.log("VOTING FINISHED 3!");
+
+	//
+	// everyone has voted
+	//
 	if (votes_finished == this.game.players.length) {
 console.log("VOTING FINISHED 4!");
-	  console.log("WE HAVE FINISHED THE VOTE ON AGENDA " + this.game.state.voting_on_agenda);
+
+  	  console.log("WE HAVE FINISHED THE VOTE ON AGENDA " + this.game.state.voting_on_agenda);
 	  console.log(JSON.stringify(this.game.state.how_voted_on_agenda));
 	  console.log(JSON.stringify(this.game.state.votes_cast));
-	}
 
+	  let votes_for = 0;
+	  let votes_against = 0;
+	  let direction_of_vote = "tie";
+ 	  let players_in_favour = [];
+	  let players_opposed = [];
+
+	  for (let i = 0; i < this.game.players.length; i++) {
+
+	    if (this.game.state.how_voted_on_agenda[i] == "support") {
+	      votes_for += this.game.state.votes_cast[i];
+	      players_in_favour.push(i+1);
+	    }
+	    if (this.game.state.how_voted_on_agenda[i] == "oppose") {
+	      votes_against += this.game.state.votes_cast[i];
+	      players_opposed.push(i+1);
+	    }
+	    if (votes_against > votes_for) { direction_of_vote = "fails"; }
+	    if (votes_against < votes_for) { direction_of_vote = "passes"; }	    
+	  }
+
+console.log("FINISH VOTING 1");
+
+	  //
+	  // announce if the vote passed
+	  //
+	  this.updateLog("The agenda "+direction_of_vote);
+	 
+	  //
+	  //
+	  //
+	  if (direction_of_vote == "passes") {
+console.log("FINISH VOTING 2");
+	    laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
+	      console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
+	    });
+	  } else {
+console.log("FINISH VOTING 2");
+	    if (direction_of_vote == "fails") {
+console.log("FINISH VOTING 3");
+	      laws[imperium_self.game.state.agendas[agenda_num]].onPass(imperium_self, players_in_favour, players_opposed, function(res) {
+	        console.log("\n\nBACK FROM AGENDA ONPASS FUNCTION");
+	      });
+	    } else {
+	      this.updateLog("The law is quietly shelved...");
+	    }
+	  }
+
+
+	
+	  //
+	  // prepare for next vote
+	  //
+	  for (let i = 0; i < this.game.players.length; i++) {
+	    this.game.state.voted_on_agenda[i] = 0;
+	  }
+	  this.game.state.voting_on_agenda++;
+
+	}
+>>>>>>> master
 
 console.log("VOTING FINISHED 5!");
 
@@ -635,6 +724,8 @@ console.log("VOTING FINISHED 5!");
 	if (this.game.player != who_is_next) {
 
           let html  = 'The following agenda has advanced for consideration in the Galactic Senate:<p></p>';
+  	      html += '<b>' + laws[imperium_self.game.state.agendas[agenda_num]].name + '</b>';
+	      html += '<br />';
 	      html += laws[imperium_self.game.state.agendas[agenda_num]].text;
 	      html += '<p></p>';
 	      html += 'Player '+who_is_next+' is now voting.';
@@ -644,6 +735,8 @@ console.log("VOTING FINISHED 5!");
 
 
           let html  = 'The following agenda has advanced for consideration in the Galactic Senate:<p></p>';
+  	      html += '<b>' + laws[imperium_self.game.state.agendas[agenda_num]].name + '</b>';
+	      html += '<br />';
   	      html += laws[imperium_self.game.state.agendas[agenda_num]].text;
 	      html += '<p></p>';
               html += '<li class="option" id="support">support</li>';
@@ -709,16 +802,23 @@ console.log("VOTING FINISHED 5!");
 
 
       if (mv[0] == "setinitiativeorder") {
-  
+
+console.log("setting init order"); 
+
   	let initiative_order = this.returnInitiativeOrder();
   	this.game.queue.push("resolve\tsetinitiativeorder");
-  
+
+console.log("initiative order is: " + JSON.stringify(initiative_order));
+ 
+
   	for (let i = 0; i < initiative_order.length; i++) {
   	  if (this.game.players_info[initiative_order[i]-1].passed == 0) {
   	    this.game.queue.push("play\t"+initiative_order[i]);
   	  }
   	}
-  
+ 
+console.log("GAME QUEUE IS PUSHED TO BE: " + this.game.queue);
+
   	return 1;
   
       }
@@ -783,7 +883,9 @@ console.log("VOTING FINISHED 5!");
   	// STRATEGY CARDS
   	//
         this.game.queue.push("playerschoosestrategycards");
-  
+ 
+
+
   	//
   	// ACTION CARDS
   	//
@@ -796,7 +898,8 @@ console.log("VOTING FINISHED 5!");
   	// ALLOCATE TOKENS
   	//
         this.game.queue.push("tokenallocation\t"+this.game.players_info.length);
-  
+ 
+
   	//
   	// mark as ready 
   	//	  
@@ -1464,9 +1567,6 @@ console.log("VOTING FINISHED 5!");
   
         let action2 = $(this).attr("id");
   
-        if (action2 == "get_new_tokens") {
-          imperium_self.playerAllocateNewTokens(imperium_self.game.player, 5);
-        }
         if (action2 == "activate") {
           imperium_self.playerActivateSystem();
         }
@@ -1506,9 +1606,12 @@ console.log("VOTING FINISHED 5!");
     let imperium_self = this;
   
     if (this.returnAvailableInfluence(this.game.player) <= 2) {
+console.log("SKIPPING INFLUENCE PURCHASE 1!");
       this.updateStatus("Skipping purchase of tokens as insufficient influence...");
+console.log("SKIPPING INFLUENCE PURCHASE 2!");
       this.endTurn();
-      return;
+console.log("SKIPPING INFLUENCE PURCHASE 3!");
+      return 0;
     }
   
     let html = 'Do you wish to purchase any command or strategy tokens? <p></p><ul>';
@@ -2095,9 +2198,11 @@ console.log("VOTING FINISHED 5!");
   
   returnAvailableVotes(player) {
 
-    let array_of_cards = this.returnPlayerPlanetCards(player); 
+    let array_of_cards = this.returnPlayerPlanetCards(player);
+console.log("cards / planets for votes: " + JSON.stringify(array_of_cards));
     let total_available_votes = 0;
     for (let z = 0; z < array_of_cards.length; z++) {
+console.log("adding influence: " + this.game.planets[array_of_cards[z]].influence);
       total_available_votes += this.game.planets[array_of_cards[z]].influence;
     }
     return total_available_votes;
@@ -2389,8 +2494,12 @@ console.log("VOTING FINISHED 5!");
     }
   
     obj.ships_and_sectors = imperium_self.returnShipsMovableToDestinationFromSectors(destination, sectors, distance);
+
+console.log("into updateinterface function...");
   
     let updateInterface = function(imperium_self, obj, updateInterface) {
+
+console.log("into updateInterface function...");
   
       let subjective_distance_adjustment = 0;
       if (obj.ship_move_bonus > 0) {
@@ -2442,9 +2551,10 @@ console.log("VOTING FINISHED 5!");
       }
       html += '<p></p>';
       html += '<div id="confirm" class="option">click here to move</div>';
-  
       imperium_self.updateStatus(html);
-  
+console.log("HERE 1"); 
+ 
+
       $('.option').off();
       $('.option').on('click', function() {
   
@@ -2469,6 +2579,8 @@ console.log("VOTING FINISHED 5!");
         };
   
   
+console.log("HERE 2");
+
         //
         // highlight ship on menu
         //
@@ -2504,6 +2616,8 @@ console.log("VOTING FINISHED 5!");
   
   
         obj.stuff_to_move.push(x);
+
+console.log("HERE 3: " + JSON.stringify(obj.stuff_to_move));
   
         updateInterface(imperium_self, obj, updateInterface);
   
@@ -2518,6 +2632,8 @@ console.log("VOTING FINISHED 5!");
   	    remove_what_capacity += thisunit.capacity_required;
   	  }
           }
+
+console.log("HERE 4");
   
           let user_message = `<div id="menu-container">This ship has <span class="capacity_remaining">${total_ship_capacity}</span> capacity to carry fighters / infantry. Do you wish to add them? <p></p><ul>`;
   
@@ -2534,6 +2650,8 @@ console.log("VOTING FINISHED 5!");
             }
           }
   
+console.log("HERE 5");
+
           let fighters_available_to_move = 0;
           for (let i = 0; i < sys.s.units[imperium_self.game.player-1].length; i++) {
             if (sys.s.units[imperium_self.game.player-1][i].name == "fighter") {
@@ -2544,13 +2662,17 @@ console.log("VOTING FINISHED 5!");
           user_message += '<li class="card" id="skip">skip</li>';
           user_message += '</ul></div>';
   
+console.log("HERE 6");
+
           //
           // choice
           //
           $('.hud_menu_overlay').html(user_message);
-          $('.status').hide();
+//          $('.status').show();
           $('.hud_menu_overlay').show();
   
+alert("HERE 7");
+
           // leave action enabled on other panels
           $('.card').on('click', function() {
   
@@ -3735,28 +3857,40 @@ console.log("VOTING FINISHED 5!");
     for (let j in strategy_cards) {
       card_io_hmap[j] = strategy_cards[j].order;
     }
-  
-  
-  
+
+ 
+console.log("Cards: " + JSON.stringify(card_io_hmap));
+ 
     for (let i = 0; i < this.game.players_info.length; i++) {
+
       player_lowest[i] = 100000;
+
+console.log("PLAYER " + (i+1) + " ----> " + JSON.stringify(this.game.players_info[i].strategy));
+
       for (let k = 0; k < this.game.players_info[i].strategy.length; k++) {
         let sc = this.game.players_info[i].strategy[k];
+console.log("this sc is: " + sc);
         let or = card_io_hmap[sc];
+console.log("comes wth or: " + or);
         if (or < player_lowest[i]) { player_lowest[i] = or; }
       }
     }
   
-  
+
+console.log("LOWEST PER PLAYER: " + JSON.stringify(player_lowest));
+ 
     let loop = player_lowest.length;
     let player_initiative_order = [];
   
     for (let i = 0; i < loop; i++) {
       let a = player_lowest.indexOf(Math.max(...player_lowest));
+console.log("pushing player: " + (a+1));
       player_lowest[a] = -1;
       player_initiative_order.push(a+1);
     }
+
   
+
     return player_initiative_order;
   
   }
@@ -3995,7 +4129,7 @@ console.log("VOTING FINISHED 5!");
     planets['planet30']	= { type : "hazardous" , img : "/imperium/img/planet_card_template.png" , name : "Gravity's Edge" , resources : 2 , influence : 1 , bonus : ""  }
     planets['planet31']	= { type : "industrial" , img : "/imperium/img/planet_card_template.png" , name : "Populax" , resources : 3 , influence : 2 , bonus : "yellow"  }
     planets['planet32']	= { type : "cultural" , img : "/imperium/img/planet_card_template.png" , name : "Old Moltour" , resources : 2 , influence : 0 , bonus : ""  }
-    planets['planet33']	= { type : "" , img : "/imperium/img/planet_card_template.png" , name : "New Byzantium" , resources : 1 , influence : 6 , bonus : ""  }
+    planets['planet33']	= { type : "diplomatic" , img : "/imperium/img/planet_card_template.png" , name : "New Byzantium" , resources : 1 , influence : 6 , bonus : ""  }
     planets['planet34']	= { type : "cultural" , img : "/imperium/img/planet_card_template.png" , name : "Outerant" , resources : 1 , influence : 3 , bonus : ""  }
     planets['planet35']	= { type : "industrial" , img : "/imperium/img/planet_card_template.png" , name : "Vespar" , resources : 2 , influence : 2 , bonus : ""  }
     planets['planet36']	= { type : "hazardous" , img : "/imperium/img/planet_card_template.png" , name : "Craw Populi" , resources : 1 , influence : 2 , bonus : ""  }
@@ -4013,7 +4147,6 @@ console.log("VOTING FINISHED 5!");
     for (var i in planets) {
       planets[i].exhausted = 0;
       planets[i].owner = -1;
-      planets[i].owner = 1;
       planets[i].units = [this.totalPlayers]; // array to store units
 
       for (let j = 0; j < this.totalPlayers; j++) {
@@ -5538,54 +5671,126 @@ console.log("VOTING FINISHED 5!");
   	type : "Law" ,
   	text : "All invasions of unoccupied planets require conquering 1 infantry" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a2']	= { 
   	name : "Wormhole Travel Ban" ,
   	type : "Law" ,
   	text : "All invasions of unoccupied planets require conquering 1 infantry" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a3']	= { 
   	name : "Regulated Bureaucracy" ,
   	type : "Law" ,
   	text : "Players may have a maximum of 3 action cards in their hands at all times" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a4']	= { 
   	name : "Freedom in Arms Act" ,
   	type : "Law" ,
   	text : "Players may place any number of PDS units on planets" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a5']	= { 
   	name : "Performance Testing" ,
   	type : "Law" ,
   	text : "After any player researches a tach, he must destroy a non-fighter ship if possible" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a6']	= { 
   	name : "Fleet Limitations" ,
   	type : "Law" ,
   	text : "Players may have a maximum of four tokens in their fleet supply." ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a7']	= { 
   	name : "Restricted Conscription" ,
   	type : "Law" ,
   	text : "Production cost for infantry and fighters is 1 rather than 0.5 resources" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a8']	= { 
   	name : "Representative Democracy" ,
   	type : "Law" ,
   	text : "All players have only 1 vote in each Politics Vote" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
     agenda['a9']	= { 
   	name : "Hidden Agenda" ,
   	type : "Law" ,
   	text : "Agendas are Hidden By Default and Only Revealed when the Politics Card is Played" ,
   	img : "/imperium/img/agenda_card_template.png" ,
+        onPass : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW PASSED!");
+          mycallback(1);
+	} ,
+        onFail : function(imperium_self, players_in_favour, players_opposed, mycallback) {
+console.log("THE LAW FAILS!");
+          mycallback(1);
+	} ,
     };
   
     return agenda;
@@ -5691,12 +5896,12 @@ console.log("VOTING FINISHED 5!");
       if (i == 4) { players[i].color   = "purple"; }
       if (i == 5) { players[i].color   = "black"; }
   
-      players[i].planets = [];
+      players[i].planets = [];		
       players[i].tech = [];
       players[i].tech_exhausted_this_turn = [];
       players[i].upgrades = [];
-      players[i].strategy = [];
-  
+      players[i].strategy = [];		// strategy cards  
+
       // scored objectives
       players[i].scored_objectives = [];
       players[i].secret_objectives = [];
@@ -6358,13 +6563,14 @@ console.log("PLAYER " + player + " has units in " + sector);
   };
   
   endTurn(nextTarget = 0) {
+
     for (let i = this.rmoves.length - 1; i >= 0; i--) {
       this.moves.push(this.rmoves[i]);
     }
-  
+
+console.log("SENDING INFO: " + this.moves); 
+ 
     this.updateStatus("Waiting for information from peers....");
-    let extra = {};
-    extra.target = this.returnNextPlayer(this.game.player);
   
     if (nextTarget != 0) {
       extra.target = nextTarget;
@@ -6373,7 +6579,9 @@ console.log("PLAYER " + player + " has units in " + sector);
     this.game.turn = this.moves;
     this.moves = [];
     this.rmoves = [];
-    this.sendMessage("game", extra);
+console.log("NOW SENDING MOVE:");
+    this.sendMessage("game", {});
+;
   };
   
   endGame(winner, method) {
@@ -6614,6 +6822,7 @@ console.log("PLAYER " + player + " has units in " + sector);
       this.game.state.how_voted_on_agenda = [];
       this.game.state.voted_on_agenda = [];
       this.game.state.voting_on_agenda = 0;
+
       for (let i = 0; i < this.game.players.length; i++) {
 	this.game.state.votes_available.push(this.returnAvailableVotes(i+1));
 	this.game.state.votes_cast.push(0);
@@ -6635,8 +6844,9 @@ console.log("PLAYER " + player + " has units in " + sector);
         // two action cards
         //
         this.addMove("resolve\tstrategy");
-        this.addMove("strategy\t"+card+"\t"+player+"\t2\t"+player_confirmation_needed);
         this.addMove("DEAL\t2\t"+this.game.player+"\t2");
+        this.addMove("notify\tdealing two action cards to player "+player);
+        this.addMove("strategy\t"+card+"\t"+player+"\t2\t"+player_confirmation_needed);
 
         //
         // pick the speaker
@@ -6772,8 +6982,10 @@ alert(chancellor);
       }
     }
   }
-  
-  
+
+
+
+
   playStrategyCardSecondary(player, card) {
   
     let imperium_self = this;
@@ -6782,10 +6994,12 @@ alert(chancellor);
     this.updateStatus("Moving into the secondary of the " + strategy_cards[card].name + " strategy card");
   
     let player_confirmation_needed = this.game.players_info.length;
-  
     this.game.confirms_needed = player_confirmation_needed;
     this.game.confirms_received = 0;
   
+
+console.log("IN SECONDARY: " + this.game.confirms_needed + " -- " + this.game.confirms_received);
+
   
     if (card == "initiative") {
       this.addMove("resolve\tstrategy\t1");
@@ -6871,7 +7085,6 @@ alert(chancellor);
     }
   
     if (card == "politics") {
-  
       imperium_self.addMove("resolve\tstrategy\t1");
       imperium_self.playerBuyActionCards();
       return 0;
@@ -7127,13 +7340,17 @@ alert(chancellor);
           }
 
         if (obj.new_tokens == 0) {
-            imperium_self.addMove("resolve\ttokenallocation\t1\t1"); // 1 = halt after move
+            if (imperium_self.game.confirms_needed > 0) {
+              imperium_self.addMove("resolve\ttokenallocation\t1");
+	    } else {
+              imperium_self.addMove("resolve\ttokenallocation");
+	    }
             imperium_self.addMove("purchase\t"+player+"\tstrategy\t"+obj.new_strategy);
             imperium_self.addMove("purchase\t"+player+"\tcommand\t"+obj.new_command);
-          imperium_self.endTurn();
+            imperium_self.endTurn();
           } else {
-          updateInterface(imperium_self, obj, updateInterface);
-        }
+            updateInterface(imperium_self, obj, updateInterface);
+          }
 
         });
 

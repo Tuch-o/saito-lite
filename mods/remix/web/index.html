@@ -24,20 +24,37 @@
     <link rel="icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png">
 
-    <title>Saito Email</title>
+    <title>Saito Remix</title>
 
     <link rel="stylesheet" href="/saito/style.css">
-    <link rel="stylesheet" href="/email/style.css">
-    <link rel="stylesheet" href="/chat/css/email-chat.css">
+    <link rel="stylesheet" href="/remix/style.css">
+
+    <script type="text/javascript" src="/saito/lib/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="/saito/lib/jquery/jquery-ui.min.js"></script>
+
 
   </head>
+
   <body>
       <div class="header"></div>
-      <div class="email-container main">
-        <div class="email-sidebar"></div>
-        <div class="email-main"></div>
+      <div class="main">
+
+	<h3>Create a Saito Module in 5 Minutes</h3>
+
+	<p></p>
+
+	<div id="remix-code" class="remix-code">
+	  <textarea name="remix-code-textarea" class="remix-code-textarea">
+	  </textarea>
+	</div>
+
+	<p></p>
+
+	<button id="remix-create-module-btn" class="remix-create-module-btn">get started</button>
+	<button id="remix-publish-module-btn" class="remix-publish-module-btn">publish module</button>
+
       </div>
       <div class="footer"></div>
-  <script id="saito" type="text/javascript" src="/saito/saito.js"></script>
+      <script id="saito" type="text/javascript" src="/saito/saito.js"></script>
   </body>
 </html>

@@ -8,8 +8,6 @@ module.exports = AppStoreAppspace = {
 
     render(app, data) {
 
-      let appstore_self = this;
-
       document.querySelector(".email-appspace").innerHTML = AppStoreAppspaceTemplate();
 
       //
@@ -17,35 +15,41 @@ module.exports = AppStoreAppspace = {
       //
       data.appstore.sendPeerDatabaseRequest(
         "appstore", "modules", "name, description, version, publickey, unixtime, bid, bsh",
-        "",
+        "featured = 1",
         null,
-        function(res, data) {
+        (res, data) => {
         if (res.rows != undefined) {
-          for (let i = 0; i < res.rows.length; i++) {
-            document.querySelector(".appstore-app-list").innerHTML += AppStoreAppBoxTemplate(app, res.rows[i]);
-          }
-        }
+	  this.populateAppsSpace(app, data, res.rows);
+	}
 
-        appstore_self.attachEvents(app, data);
       });
 
       //
       // load some categories
       //
-      document.querySelector(".appstore-browse-list").innerHTML += AppStoreAppCategoryTemplate({});
+      //document.querySelector(".appstore-browse-list").innerHTML += AppStoreAppCategoryTemplate({});
 
     },
 
-    attachEvents(app, data) {
+    populateAppsSpace(app, data, rows) {
 
-      document.getElementById('appstore-publish-button').onclick = () => {
-        AppStoreAppspacePublish.render(app, data);
-        AppStoreAppspacePublish.attachEvents(app, data);
+      document.querySelector(".appstore-app-list").innerHTML = "";
+      for (let i = 0; i < rows.length; i++) {
+        document.querySelector(".appstore-app-list").innerHTML += AppStoreAppBoxTemplate(app, rows[i]);
       }
 
+      //
+      // make apps installable
+      //
+      this.attachEventsToModules(app, data);
+
+    },
+
+
+    attachEventsToModules(app, data) {
 
       //
-      // Create Game
+      // install module (button)
       //
       Array.from(document.getElementsByClassName("appstore-app-install-btn")).forEach(installbtn => {
 
@@ -75,17 +79,58 @@ module.exports = AppStoreAppspace = {
           newtx.transaction.msg.module   = "AppStore";
           newtx.transaction.msg.request  = "request bundle";
           newtx.transaction.msg.list	 = module_list;
+alert("LIST: " + module_list);
           newtx = app.wallet.signTransaction(newtx);
           app.network.propagateTransaction(newtx);
 
           document.querySelector(".email-appspace").innerHTML = `
-            <div>
-              <center>Your apps are being downloaded. Please do not leave this page</center>
+            <div class="appstore-bundler-install-notice">
+              <center style="margin-bottom:20px">Your custom Saito bundle is being compiled. Please do not leave this page -- estimated time to completion 60 seconds.</center>
               <center><div class="loader" id="game_spinner"></div></center>
             </div>
           `;
 
         };
+      });
+
+    },
+
+
+    attachEvents(app, data) {
+
+      //
+      // publish apps
+      //
+      document.getElementById('appstore-publish-button').onclick = () => {
+        AppStoreAppspacePublish.render(app, data);
+        AppStoreAppspacePublish.attachEvents(app, data);
+      }
+
+      //
+      // search box
+      //
+      document.getElementById('appstore-search-box').addEventListener('click', (e) => {
+	e.currentTarget.placeholder = "";
+        e.currentTarget.value = "";
+      });
+
+      document.getElementById('appstore-search-box').addEventListener('keypress', (e) => {
+        let key = e.which || e.keyCode;
+        if (key === 13) {
+          alert("Search Query: " + e.currentTarget.value);
+
+	  var message             = {};
+    	  message.request         = "appstore search modules";
+          message.data		  = e.currentTarget.value;
+
+          app.network.sendRequestWithCallback(message.request, message.data, (res) => {
+alert("received data in return");
+console.log(JSON.stringify(res));
+            if (res.rows != undefined) {
+	      this.populateAppsSpace(app, data, res.rows);
+	    }
+	  });
+        }
       });
     }
 

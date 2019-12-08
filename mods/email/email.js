@@ -40,6 +40,9 @@ class Email extends ModTemplate {
     this.uidata.mods		= [];
     this.count = 0;
 
+    // add our address controller
+    this.addrController = new AddressController(app, this.returnMenuItems());
+
   }
 
   render(app, data) {
@@ -97,9 +100,6 @@ class Email extends ModTemplate {
     for (let i = 0; i < x.length; i++) {
       this.mods.push(x[i]);
     }
-
-    // add our address controller
-    this.addrController = new AddressController(app, this.uidata, this.returnMenuItems());
 
     this.uidata.mods	  = this.mods;
     this.uidata.parentmod = this;
@@ -191,6 +191,7 @@ class Email extends ModTemplate {
 
   addEmail(tx) {
     this.emails.inbox.unshift(tx);
+    this.addrController.fetchIdentifiers([tx.transaction.from[0].add]);
     if (this.browser_active) { this.renderMain(this.app, this.uidata); }
   }
 
