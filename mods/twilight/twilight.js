@@ -77,7 +77,7 @@ class Twilight extends GameTemplate {
 
     if (type == "arcade-carousel") {
       let obj = {};
-      obj.background = "/twilight/img/arcade/arcade-banner-background.png";
+      obj.background = "/twilight/img/arcade/arcade.png-banner-background";
       obj.title = "Twilight Struggle";
       return obj;
     }
@@ -14011,7 +14011,7 @@ console.log("1");
 
             <div style="font-size:0.85em;font-weight:bold;clear:both;margin-top:10px;">add cards to game: </div>
            <ul id="removecards" class="removecards">
-              <li><input class="remove_card saito_edition" type="checkbox" name="culturaldiplomacy" checked /> Cultural Diplomacy (Early-War)</li>
+              <li><input class="remove_card saito_edition" type="checkbox" name="culturaldiplomacy" checked /> <div class="tip"> Cultural Diplomacy (Early-War)<div class="tiptext"> <img src="/twilight/img/en/TNRnTS-202png.png"" alt="Cultural Diplomacy" height="388" width="388"> </div></div></li>
               <li><input class="remove_card saito_edition" type="checkbox" name="handshake" checked /> Handshake in Space (Mid-War)</li>
               <li><input class="remove_card saito_edition" type="checkbox" name="rustinredsquare" checked /> Rust Lands in Red Square (Late-War)</li>
               <li><input class="remove_card" type="checkbox" name="gouzenkoaffair" /> Gouzenko Affair (Early-War)</li>
