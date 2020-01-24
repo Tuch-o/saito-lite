@@ -14012,10 +14012,10 @@ console.log("1");
             <div style="font-size:0.85em;font-weight:bold;clear:both;margin-top:10px;">add cards to game: </div>
            <ul id="removecards" class="removecards">
               <li><input class="remove_card saito_edition" type="checkbox" name="culturaldiplomacy" checked /> <div class="tip"> Cultural Diplomacy (Early-War)<div class="tiptext"> <img src="/twilight/img/en/TNRnTS-202png.png"" alt="Cultural Diplomacy" height="388" width="388"> </div></div></li>
-              <li><input class="remove_card saito_edition" type="checkbox" name="handshake" checked /> Handshake in Space (Mid-War)</li>
-              <li><input class="remove_card saito_edition" type="checkbox" name="rustinredsquare" checked /> Rust Lands in Red Square (Late-War)</li>
-              <li><input class="remove_card" type="checkbox" name="gouzenkoaffair" /> Gouzenko Affair (Early-War)</li>
-              <li><input class="remove_card saito_edition" type="checkbox" name="berlinagreement" checked /> 1971 Berlin Agreement (Mid-War)</li>
+              <li><input class="remove_card saito_edition" type="checkbox" name="handshake" checked /> <div class="tip"> Handshake in Space (Mid-War) <div class="tiptext"><img src="/twilight/img/en/TNRnTS-201png.png"" alt="Handshake in Space" height="388" width="388"></div></div></li>
+              <li><input class="remove_card saito_edition" type="checkbox" name="rustinredsquare" checked /> <div class="tip">Rust Lands in Red Square <div class="tiptext"><img src="/twilight/img/en/TNRnTS-203png.png"" alt="Rust Lands in Red Square" height="388" width="388"></div></div> (Late-War)</li>
+              <li><input class="remove_card" type="checkbox" name="gouzenkoaffair" /> <div class="tip">Gouzenko Affair (Early-War)<div class="tiptext"><img src="/twilight/img/en/TNRnTS-204png.png"" alt="Gouzenko Affair" height="388" width="388"></div></div></li>
+              <li><input class="remove_card saito_edition" type="checkbox" name="berlinagreement" checked /> <div class="tip"> 1971 Berlin Agreement (Mid-War) <div class="tiptext"><img src="/twilight/img/en/TNRnTS-205png.png"" alt="Berlin Agreement" height="388" width="388"></div></div></li>
             </div>
           </form>
 
