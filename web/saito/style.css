@@ -1255,6 +1255,8 @@ i.fas.fa-times-circle {
 .tip .tiptext {
   visibility: hidden;
   color: #fff !important;
+  width: unset;
+  min-width: unset;
   position: absolute;
   z-index: 1;
 }
