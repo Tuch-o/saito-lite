@@ -1,5 +1,3 @@
-#!/bin/bash
-
 function reset {
   if [ ! -d "./bundler" ]; then
     mkdir bundler/
