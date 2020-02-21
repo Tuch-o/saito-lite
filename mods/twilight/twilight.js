@@ -1,8 +1,7 @@
 
 const GameHud = require('../../lib/templates/lib/game-hud/game-hud');
 const GameTemplate = require('../../lib/templates/gametemplate');
-
-// const addHammerListeners = require('../../lib/helpers/hammer');
+const helpers = require('../../lib/helpers');
 
 
 //
@@ -32,7 +31,7 @@ class Twilight extends GameTemplate {
 
     this.app             = app;
 
-    this.name    = "Twilight";
+    this.name  		 = "Twilight";
     this.slug		 = "twilight";
     this.description     = `Twilight Struggle is a card-driven strategy game for two players, with its theme taken from the Cold War.
       One player plays the United States (US), and the other plays the Soviet Union (USSR).`;
@@ -48,7 +47,8 @@ class Twilight extends GameTemplate {
     this.moves           = [];
     this.is_testing = 0;
 
-    this.interface = 1;
+    this.log_length = 150;
+    this.interface = 0;
     this.dont_show_confirm = 0;
 
     this.gameboardZoom  = 0.90;
@@ -96,7 +96,7 @@ class Twilight extends GameTemplate {
         callback: this.handleCardsMenuItem.bind(this)
       },
       'game-lang': {
-        name: 'Lang',
+        name: 'Display',
         callback: this.handleLangMenuItem.bind(this)
       },
       'game-player': {
@@ -187,6 +187,11 @@ class Twilight extends GameTemplate {
           <li class="menu-item" id="english">English</li>
           <li class="menu-item" id="chinese">简体中文</li>
         </ul>
+        <div style="margin-top:20px">Card Display:</div>
+       <ul>
+          <li class="menu-item" id="text">Text Menu</li>
+          <li class="menu-item" id="graphics">Graphical Menu</li>
+        </ul>
       </div>`;
 
     $('.hud-menu-overlay').html(user_message);
@@ -198,6 +203,17 @@ class Twilight extends GameTemplate {
     $('.menu-item').on('click', function() {
 
       let action2 = $(this).attr("id");
+
+      if (action2 === "text") {
+        twilight_self.displayModal("Card Menu options changed to text-mode. Please reload.");
+        twilight_self.interface = 0;
+        twilight_self.saveGamePreference("interface", 0);
+      }
+      if (action2 === "graphics") {
+        twilight_self.displayModal("Card Menu options changed to graphical mode. Please reload.");
+        twilight_self.interface = 1;
+        twilight_self.saveGamePreference("interface", 1);
+      }
 
       if (action2 === "english") {
         twilight_self.displayModal("Language Settings", "Card settings changed to English");
@@ -245,6 +261,13 @@ class Twilight extends GameTemplate {
     twilight_self.addLogCardEvents();
   }
 
+  initialize(app) {
+    this.app.modules.respondTo("chat-manager").forEach(mod => {
+      mod.respondTo('chat-manager').render(app, this);
+      mod.respondTo('chat-manager').attachEvents(app, this);
+    });
+    super.initialize(app);
+  }
 
 
   ////////////////
@@ -269,6 +292,9 @@ class Twilight extends GameTemplate {
     if (this.app.options.gameprefs != undefined) {
       if (this.app.options.gameprefs.interface == 0) {
         this.interface = 0;
+      }
+      if (this.app.options.gameprefs.interface == 1) {
+        this.interface = 1;
       }
       if (this.app.options.gameprefs.dont_show_confirm == 1) {
         this.dont_show_confirm = 1;
@@ -302,15 +328,12 @@ console.log("\n\n\n\n");
 
     this.updateStatus("Generating the Game");
 
-console.log("1");
-
     this.game.queue.push("round");
     if (this.game.options.usbonus != undefined) {
       if (this.game.options.usbonus > 0) {
         this.game.queue.push("placement_bonus\t2\t"+this.game.options.usbonus);
       }
     }
-console.log("2");
     this.game.queue.push("placement\t2");
     this.game.queue.push("placement\t1");
     this.game.queue.push("READY");
@@ -321,7 +344,6 @@ console.log("2");
     this.game.queue.push("DECKXOR\t1\t2");
     this.game.queue.push("DECKXOR\t1\t1");
 
-console.log("3");
     //
     // TESTING
     //
@@ -344,17 +366,14 @@ console.log("3");
     } else {
       this.game.queue.push("DECK\t1\t"+JSON.stringify(this.returnEarlyWarCards()));
     }
-console.log("4");
     this.game.queue.push("init");
 
     if (this.game.dice === "") {
       this.initializeDice();
     }
-console.log("5");
 
   }
 
-console.log("6");
   this.countries = this.game.countries;
 
   // this.hud = new GameHud(this.app, 0, 0, this.menuItems());
@@ -369,7 +388,6 @@ console.log("6");
   $('.ussr').css('width', this.scale(100)+"px");
   $('.us').css('height', this.scale(100)+"px");
   $('.ussr').css('height', this.scale(100)+"px");
-console.log("7");
 
   //
   $('.formosan_resolution').css('width', this.scale(202)+"px");
@@ -380,19 +398,12 @@ console.log("7");
   //
   // update defcon and milops and stuff
   //
-console.log("8");
   this.updateDefcon();
-console.log("9");
   this.updateActionRound();
-console.log("1");
   this.updateSpaceRace();
-console.log("2");
   this.updateVictoryPoints();
-console.log("3");
   this.updateMilitaryOperations();
-console.log("4");
   this.updateRound();
-console.log("5");
 
   //
   // initialize interface
@@ -417,9 +428,8 @@ console.log("5");
 
 console.log("1");
   var element = document.getElementById('gameboard');
-  // if (element !== null) { addHammerListeners(element); }
+  if (element !== null) { helpers.hammer(element); }
 
-console.log("1");
 
 /*****
   let twilight_self = this;
@@ -486,7 +496,7 @@ console.log("1");
     ///////////
     if (this.game.queue.length > 0) {
 
-  // console.log("QUEUE: " + JSON.stringify(this.game.queue));
+  console.log("QUEUE: " + JSON.stringify(this.game.queue));
 
         let qe = this.game.queue.length-1;
         let mv = this.game.queue[qe].split("\t");
@@ -2334,9 +2344,9 @@ console.log("1");
           //
           this.game.state.events.china_card_eligible = 0;
 
-    //
-    // back button functions again
-    //
+          //
+          // back button functions again
+          //
           this.game.state.back_button_cancelled = 0;
 
           //
@@ -3346,7 +3356,10 @@ console.log("1");
     let opponent = "us";
     let playable_cards = [];
 
-    if (this.game.player == 2) { player = "us"; opponent = "ussr"; }
+    if (this.game.player == 2) {
+      player = "us";
+      opponent = "ussr"; 
+    }
 
     is_this_missile_envy_noneventable = this.game.state.events.missileenvy;
 
@@ -4473,7 +4486,7 @@ console.log("1");
       this.countries[country].ussr = parseInt(this.countries[country].ussr) + parseInt(inf);
     }
 
-    this.updateLog(player.toUpperCase() + "</span> <span>places</span> " + inf + " <span>in</span> <span>" + this.countries[country].name);
+    this.updateLog(player.toUpperCase() + "</span> <span>places</span> " + inf + " <span>in</span> <span>" + this.countries[country].name, this.log_length, 1);
 
     this.showInfluence(country, player, mycallback);
 
@@ -4719,8 +4732,6 @@ console.log("1");
 
       if (restricted_country == 1) {
 
-  alert("restricted COUNTRY == 1: " + divname);
-
         $(divname).off();
         $(divname).on('click', function() {
           twilight_self.displayModal("Invalid Target");
@@ -4738,9 +4749,10 @@ console.log("1");
             if (twilight_self.countries[countryname].place == 1) {
 
               //
-              // vietnam revolts and china card
+              // vietnam revolts and china card - US never eligible for former
               //
-              if (twilight_self.countries[countryname].region !== "seasia") { twilight_self.game.state.events.vietnam_revolts_eligible = 0; }
+              twilight_self.game.state.events.vietnam_revolts_eligible = 0;
+              //if (twilight_self.countries[countryname].region !== "seasia") { twilight_self.game.state.events.vietnam_revolts_eligible = 0; }
               if (twilight_self.countries[countryname].region.indexOf("asia") < 0) { twilight_self.game.state.events.china_card_eligible = 0; }
 
               if (twilight_self.isControlled("ussr", countryname) == 1) { twilight_self.game.break_control = 1; }
@@ -6471,12 +6483,23 @@ console.log("1");
       }
       if (this.game.player == 2) {
 
-        this.updateStatus("Place 1 influence in each of 7 non USSR-controlled countries in Western Europe");
+	var countries_where_i_can_place = 0;
+        for (var i in this.countries) {
+          if (i == "canada" || i == "uk" || i == "sweden" || i == "france" || i == "benelux" || i == "westgermany" || i == "spain" ||  i == "italy" || i == "greece" || i == "turkey" || i == "denmark" || i == "norway" || i == "sweden" ||  i == "finland" || i == "austria") {
+            if (twilight_self.isControlled("ussr", countryname) != 1) {
+	      countries_where_i_can_place++;
+	    }
+	  }
+        }
+
+        var ops_to_place = countries_where_i_can_place;
+	if (ops_to_place > 7) { ops_to_place = 7; }
+
+        this.updateStatus("Place 1 influence in each of "+ops_to_place+" non USSR-controlled countries in Western Europe");
 
         var twilight_self = this;
         twilight_self.playerFinishedPlacingInfluence();
 
-        var ops_to_place = 7;
         twilight_self.addMove("resolve\tmarshall");
         for (var i in this.countries) {
 
@@ -10981,6 +11004,13 @@ console.log("1");
         return 1;
       }
 
+      if (this.game.state.events.cubanmissilecrisis == 1) {
+	this.updateStatus("USSR is under Cuban Missile Crisis and cannot coup. Skipping Ortega coup.");
+	this.updateLog("USSR is under Cuban Missile Crisis and cannot coup. Skipping Ortega coup.");
+	return 1;
+      }
+
+
       if (this.game.player == 1) {
         this.updateStatus("Pick a country adjacent to Nicaragua to coup: ");
       } else {
@@ -12698,9 +12728,9 @@ console.log("1");
       return `<div id="${card.replace(/ /g,'')}" class="card showcard cardbox-hud cardbox-hud-status">${this.returnCardImage(card)}</div>`;
     } else {
       if (this.game.deck[0].cards[card] == undefined) {
-        return '<li class="card" id="'+card+'">'+this.game.deck[0].cards[card].name+'</li>';
+        return '<li class="card showcard" id="'+card+'">'+this.game.deck[0].cards[card].name+'</li>';
       }
-      return '<li class="card" id="'+card+'">'+this.game.deck[0].cards[card].name+'</li>';
+      return '<li class="card showcard" id="'+card+'">'+this.game.deck[0].cards[card].name+'</li>';
     }
 
   }
@@ -13730,7 +13760,7 @@ console.log("1");
     let twilight_self = this;
 
     twilight_self.hideCard();
-    twilight_self.showCard(card);
+    twilight_self.showPlayableCard(card);
 
     $('.cardbox_menu_playcard').css('display','block');
     $('.cardbox_menu_playcard').off();
@@ -13812,23 +13842,29 @@ console.log("1");
   }
 
   showCard(cardname) {
+    let card_html = this.returnCardImage(cardname);
+    let cardbox_html = this.app.browser.isMobileBrowser(navigator.userAgent) ?
+      `${card_html}
+        <div id="cardbox-exit-background">
+          <div class="cardbox-exit" id="cardbox-exit">×</div>
+        </div>` : card_html;
 
-    let url = this.returnCardImage(cardname);
+    $('#cardbox').html(cardbox_html);
+    $('#cardbox').show();
+  }
 
-    //
-    // mobile needs recentering
-    //
-    if (this.app.browser.isMobileBrowser(navigator.userAgent)) {
-      // add additional html
-      url += `
+  showPlayableCard(cardname) {
+    let card_html = this.returnCardImage(cardname);
+    let cardbox_html = this.app.browser.isMobileBrowser(navigator.userAgent) ?
+      `${card_html}
       <div id="cardbox-exit-background">
-      <div class="cardbox-exit" id="cardbox-exit">×</div>
+        <div class="cardbox-exit" id="cardbox-exit">×</div>
       </div>
-      <div class="cardbox_menu_playcard cardbox_menu_btn" id="cardbox_menu_playcard">PLAY</div>`
-      $('.cardbox-exit').show();
-    }
+      <div class="cardbox_menu_playcard cardbox_menu_btn" id="cardbox_menu_playcard">
+        PLAY
+      </div>` : card_html;
 
-    $('#cardbox').html(url);
+    $('#cardbox').html(cardbox_html);
     $('#cardbox').show();
   }
 
@@ -13844,8 +13880,8 @@ console.log("1");
   //
   // OVERWRITES GAME.JS MODULE TO ADD CARD HOVERING
   //
-  updateLog(str, length = 150) {
-    this.hud.updateLog(str, this.addLogCardEvents.bind(this));
+  updateLog(str, length = 150, force=0) {
+    this.hud.updateLog(str, this.addLogCardEvents.bind(this), force);
   }
 
 
@@ -14054,10 +14090,11 @@ console.log("1");
 
     this.hud.status_callback = () => {
       let twilight_self = this;
+      let isMobile = this.app.browser.isMobileBrowser(navigator.userAgent);
 
       $('.card').off();
 
-      if (!this.app.browser.isMobileBrowser(navigator.userAgent)) {
+      if (!isMobile) {
 
         $('.showcard').off();
         $('.showcard').mouseover(function() {
@@ -14072,7 +14109,20 @@ console.log("1");
 
       $('.card').on('click', function() {
         // pass our click option
-        onCardClickFunction(this);
+        if (onCardClickFunction) onCardClickFunction(this);
+        else {
+          if (isMobile) {
+            let card = $(this).attr("id");
+            twilight_self.showCard(card);
+
+            $('.cardbox-exit').off();
+            $('.cardbox-exit').on('click', function () {
+              twilight_self.hideCard();
+              $('.cardbox_menu_playcard').css('display','none');
+              $(this).css('display', 'none');
+            });
+          }
+        }
       });
     }
 
@@ -14103,14 +14153,19 @@ console.log("1");
     let new_options = {};
     for (var index in options) {
       if (index == "player1") {
-        new_options[index] = options[index] == "ussr" ? "us" : "ussr";
+        if (options[index] == "random") {
+          new_options[index] = options[index];
+        } else {
+          new_options[index] = options[index] == "ussr" ? "ussr" : "us";
+        }
       } else {
         new_options[index] = options[index]
       }
     }
-
     return new_options;
   }
+
+
 
 
 

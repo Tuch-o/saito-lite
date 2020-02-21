@@ -146,6 +146,10 @@ button, .button, .file-label {
   min-width: 180px;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 i {
   transition: all .25s;
 }
@@ -1062,6 +1066,7 @@ label.treated {
   background: #333d;
   color: var(--saito-skyline-grey);
   position: relative;
+  cursor: pointer;
 }
 
 .welcome-modal-exit .fa-arrow-right {
@@ -1250,7 +1255,6 @@ i.fas.fa-times-circle {
 
 .tip {
   position: relative;
-  display: inline-block;
 }
 
 /* tip text */
@@ -1260,6 +1264,14 @@ i.fas.fa-times-circle {
   color: #fff !important;
   position: absolute;
   z-index: 1;
+}
+
+.tiptext.headertip {
+  width: unset;
+  min-width: unset;
+  white-space: nowrap;
+  top: 3em;
+  right: 1em;
 }
 
 .welcome-modal-info .tip {
@@ -1293,4 +1305,8 @@ i.fas.fa-times-circle {
 
 .share-link {
   color: #555;
+}
+
+a.header-icon-fullscreen.tip {
+  color: transparent;
 }
