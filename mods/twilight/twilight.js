@@ -10062,7 +10062,7 @@ console.log("\n\n\n\n");
             let play_brush_war = 1;
             let divname = "#" + i;
 
-            if (i === "italy" || i === "greece" || i === "spain") {
+            if (i === "italy" || i === "greece" || i === "spain" || i === "turkey") {
               if (twilight_self.game.state.events.nato == 1) {
                 if (twilight_self.isControlled("us", i) == 1) {
                   play_brush_war = 0;
