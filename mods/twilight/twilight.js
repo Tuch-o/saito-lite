@@ -8035,7 +8035,7 @@ console.log("\n\n\n\n");
         return 1;
       }
 
-      if (countries_with_us_influence <= 2) {
+      /*if (countries_with_us_influence <= 2) {
         for (var i in this.countries) {
           if (i == "sudan" || i == "egypt" || i == "libya" || i == "syria" || i == "iran" || i == "iraq" || i == "jordan" || i == "saudiarabia") {
             if (this.countries[i].us > 0) {
@@ -8045,7 +8045,7 @@ console.log("\n\n\n\n");
           }
         }
         return 1;
-      }
+      }*/
 
       //
       // or ask the USSR to choose
